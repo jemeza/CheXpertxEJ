@@ -164,6 +164,8 @@ class CheXpertTrainer():
             
             varTarget = target.cuda(non_blocking = True)
             varOutput = model(varInput)
+            print("varTarget: ", varTarget)
+            print("varOutput: ", varOutput)
             lossvalue = loss(varOutput, varTarget)
                        
             lossvalue.backward()
