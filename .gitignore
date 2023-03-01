@@ -3,3 +3,5 @@ CheXpert-v1.0*/
 results/
 archive.zip*
 *Zone.Identifier
+env/
+.idea/
