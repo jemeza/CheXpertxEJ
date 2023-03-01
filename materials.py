@@ -3,6 +3,7 @@
 ###################
 ## Prerequisites ##
 ###################
+import sys
 import time
 import pickle
 import random
@@ -28,7 +29,7 @@ import sklearn.metrics as metrics
 from sklearn.metrics import roc_auc_score
 
 use_gpu = torch.cuda.is_available()
-
+eps = sys.float_info.epsilon
 
 
 ######################
@@ -99,7 +100,7 @@ class CheXpertTrainer():
     def train(model, dataLoaderTrain, dataLoaderVal, class_names, nnClassCount, trMaxEpoch, PATH, f_or_l, checkpoint, cfg):
         optimizer = optim.Adam(model.parameters(), lr = cfg.lr, # setting optimizer & scheduler
                                betas = tuple(cfg.betas), eps = cfg.eps, weight_decay = cfg.weight_decay) 
-        loss = torch.nn.BCELoss() # setting loss function
+        loss = torch.nn.BCEWithLogitsLoss() # setting loss function
 
         if checkpoint != None and use_gpu: # loading checkpoint
             modelCheckpoint = torch.load(checkpoint)
@@ -118,6 +119,7 @@ class CheXpertTrainer():
         # Train the network
         lossMIN, lossMIN_each = 100000, [100000]*5
         lossv_traj_epoch = np.empty((nnClassCount, 0)).tolist()
+        model_num = 0
         model_num_each = [0]*5
         train_start, train_end = [], []
         
@@ -164,9 +166,7 @@ class CheXpertTrainer():
             
             varTarget = target.cuda(non_blocking = True)
             varOutput = model(varInput)
-            print("varTarget: ", varTarget)
-            print("varOutput: ", varOutput)
-            lossvalue = loss(varOutput, varTarget)
+            lossvalue = loss(varOutput + eps, varTarget + eps)
                        
             lossvalue.backward()
             optimizer.step()
@@ -182,6 +182,7 @@ class CheXpertTrainer():
         model.eval()
         lossVal = 0
         lossVal_Card, lossVal_Edem, lossVal_Cons, lossVal_Atel, lossVal_PlEf = 0, 0, 0, 0, 0
+        
 
         with torch.no_grad():
             for i, (varInput, target) in enumerate(dataLoaderVal):
@@ -200,16 +201,21 @@ class CheXpertTrainer():
                 varOutput_PlEf = torch.tensor([i[4] for i in varOutput.tolist()])
                 target_PlEf = torch.tensor([i[4] for i in target.tolist()])
 
-                lossvalue = loss(varOutput, target)
+                lossvalue = loss(varOutput + eps, target + eps)
+                print("LOSSVALUE: ", lossvalue)
                 lossVal += lossvalue.item()*varInput.size(0)
                 
-                lossVal_Card += loss(varOutput_Card, target_Card).item()*varInput.size(0)
-                lossVal_Edem += loss(varOutput_Edem, target_Edem).item()*varInput.size(0)
-                lossVal_Cons += loss(varOutput_Cons, target_Cons).item()*varInput.size(0)
-                lossVal_Atel += loss(varOutput_Atel, target_Atel).item()*varInput.size(0)
-                lossVal_PlEf += loss(varOutput_PlEf, target_PlEf).item()*varInput.size(0)
+                lossVal_Card += loss(varOutput_Card + eps, target_Card + eps).item()*varInput.size(0)
+                lossVal_Edem += loss(varOutput_Edem + eps, target_Edem + eps).item()*varInput.size(0)
+                lossVal_Cons += loss(varOutput_Cons + eps, target_Cons + eps).item()*varInput.size(0)
+                lossVal_Atel += loss(varOutput_Atel + eps, target_Atel + eps).item()*varInput.size(0)
+                lossVal_PlEf += loss(varOutput_PlEf + eps, target_PlEf + eps).item()*varInput.size(0)
                 
             lossv = lossVal / len(dataLoaderVal.dataset)
+
+            print("Dataloader len : ", len(dataLoaderVal.dataset))
+            print("Lossval : ", lossVal)
+
             lossv_Card = lossVal_Card / len(dataLoaderVal.dataset)
             lossv_Edem = lossVal_Edem / len(dataLoaderVal.dataset)
             lossv_Cons = lossVal_Cons / len(dataLoaderVal.dataset)
