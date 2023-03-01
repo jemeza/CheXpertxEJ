@@ -166,7 +166,7 @@ class CheXpertTrainer():
             
             varTarget = target.cuda(non_blocking = True)
             varOutput = model(varInput)
-            lossvalue = loss(varOutput + eps, varTarget + eps)
+            lossvalue = loss(varOutput + eps, varTarget)
                        
             lossvalue.backward()
             optimizer.step()
@@ -201,20 +201,16 @@ class CheXpertTrainer():
                 varOutput_PlEf = torch.tensor([i[4] for i in varOutput.tolist()])
                 target_PlEf = torch.tensor([i[4] for i in target.tolist()])
 
-                lossvalue = loss(varOutput + eps, target + eps)
-                print("LOSSVALUE: ", lossvalue)
+                lossvalue = loss(varOutput + eps, target)
                 lossVal += lossvalue.item()*varInput.size(0)
                 
-                lossVal_Card += loss(varOutput_Card + eps, target_Card + eps).item()*varInput.size(0)
-                lossVal_Edem += loss(varOutput_Edem + eps, target_Edem + eps).item()*varInput.size(0)
-                lossVal_Cons += loss(varOutput_Cons + eps, target_Cons + eps).item()*varInput.size(0)
-                lossVal_Atel += loss(varOutput_Atel + eps, target_Atel + eps).item()*varInput.size(0)
-                lossVal_PlEf += loss(varOutput_PlEf + eps, target_PlEf + eps).item()*varInput.size(0)
+                lossVal_Card += loss(varOutput_Card + eps, target_Card).item()*varInput.size(0)
+                lossVal_Edem += loss(varOutput_Edem + eps, target_Edem).item()*varInput.size(0)
+                lossVal_Cons += loss(varOutput_Cons + eps, target_Cons).item()*varInput.size(0)
+                lossVal_Atel += loss(varOutput_Atel + eps, target_Atel).item()*varInput.size(0)
+                lossVal_PlEf += loss(varOutput_PlEf + eps, target_PlEf).item()*varInput.size(0)
                 
             lossv = lossVal / len(dataLoaderVal.dataset)
-
-            print("Dataloader len : ", len(dataLoaderVal.dataset))
-            print("Lossval : ", lossVal)
 
             lossv_Card = lossVal_Card / len(dataLoaderVal.dataset)
             lossv_Edem = lossVal_Edem / len(dataLoaderVal.dataset)
