@@ -1,6 +1,6 @@
 {
     "image_type": "small",
-    "pre_trained": false,
+    "pre_trained": true,
     "nnClassCount": 5,
     "policy": "diff",
     "batch_size": 16,

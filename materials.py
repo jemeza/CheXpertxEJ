@@ -99,7 +99,7 @@ class CheXpertTrainer():
     def train(model, dataLoaderTrain, dataLoaderVal, class_names, nnClassCount, trMaxEpoch, PATH, f_or_l, checkpoint, cfg):
         optimizer = optim.Adam(model.parameters(), lr = cfg.lr, # setting optimizer & scheduler
                                betas = tuple(cfg.betas), eps = cfg.eps, weight_decay = cfg.weight_decay) 
-        loss = torch.nn.BCELoss() # setting loss function
+        loss = torch.nn.BCEWithLogitsLoss() # setting loss function
 
         if checkpoint != None and use_gpu: # loading checkpoint
             modelCheckpoint = torch.load(checkpoint)
@@ -185,7 +185,9 @@ class CheXpertTrainer():
             for i, (varInput, target) in enumerate(dataLoaderVal):
                 
                 target = target.cuda(non_blocking = True)
+                print('target')
                 varOutput = model(varInput)
+                print('varoutput')
 
                 varOutput_Card = torch.tensor([i[0] for i in varOutput.tolist()])
                 target_Card = torch.tensor([i[0] for i in target.tolist()])
@@ -214,7 +216,9 @@ class CheXpertTrainer():
             lossv_Atel = lossVal_Atel / len(dataLoaderVal.dataset)
             lossv_PlEf = lossVal_PlEf / len(dataLoaderVal.dataset)
             lossv_each = [lossv_Card, lossv_Edem, lossv_Cons, lossv_Atel, lossv_PlEf]
-                                
+
+
+        print(lossv)       
         return lossv, lossv_each
 
     
@@ -286,12 +290,16 @@ class DenseNet121(nn.Module):
     '''
     def __init__(self, out_size, nnIsTrained):
         super(DenseNet121, self).__init__()
+        print('super init')
         self.densenet121 = torchvision.models.densenet121(pretrained = nnIsTrained)
+        print('self.densenet')
         num_ftrs = self.densenet121.classifier.in_features
+        print(num_ftrs)
         self.densenet121.classifier = nn.Sequential(
             nn.Linear(num_ftrs, out_size),
             nn.Sigmoid()
         )
+        print('done')
 
     def forward(self, x):
         x = self.densenet121(x)
