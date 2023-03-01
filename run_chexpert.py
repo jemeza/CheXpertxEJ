@@ -143,17 +143,19 @@ if __name__ == '__main__':
 
     # Create DataLoaders
     dataLoaderTrain_frt = DataLoader(dataset = datasetTrain_frt, batch_size = trBatchSize, 
-                                    shuffle = True, num_workers = 2, pin_memory = True) ###
+                                    shuffle = True, num_workers = 1, pin_memory = True) ###
     dataLoaderTrain_lat = DataLoader(dataset = datasetTrain_lat, batch_size = trBatchSize, 
-                                    shuffle = True, num_workers = 2, pin_memory = True) ###
+                                    shuffle = True, num_workers = 1, pin_memory = True) ###
     dataLoaderVal_frt = DataLoader(dataset = datasetValid_frt, batch_size = trBatchSize, 
-                                shuffle = False, num_workers = 2, pin_memory = True)
+                                shuffle = False, num_workers = 1, pin_memory = True)
     dataLoaderVal_lat = DataLoader(dataset = datasetValid_lat, batch_size = trBatchSize, 
-                                shuffle = False, num_workers = 2, pin_memory = True)
-    dataLoaderTest_frt = DataLoader(dataset = datasetTest_frt, num_workers = 2, pin_memory = True)
-    dataLoaderTest_lat = DataLoader(dataset = datasetTest_lat, num_workers = 2, pin_memory = True)
-    dataLoaderTest_agg = DataLoader(dataset = datasetTest_agg, num_workers = 2, pin_memory = True)
-
+                                shuffle = False, num_workers = 1, pin_memory = True)
+    dataLoaderTest_frt = DataLoader(dataset = datasetTest_frt, num_workers = 1, pin_memory = True)
+    dataLoaderTest_lat = DataLoader(dataset = datasetTest_lat, num_workers = 1, pin_memory = True)
+    dataLoaderTest_agg = DataLoader(dataset = datasetTest_agg, num_workers = 1, pin_memory = True)
+    """
+        Modified the lines above to get rid of parallelism
+    """
 
 
     #####################
